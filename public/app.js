@@ -260,7 +260,7 @@ function renderWorkflow(data) {
 
 function renderField(label, value) {
   let content;
-  if (value === undefined || value === null || value === "") {
+  if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
     content = '<div class="empty-state">Not specified</div>';
   } else if (typeof value === "object") {
     content = `<pre style="background:#f8fafc;padding:12px;border-radius:8px;overflow:auto;font-size:12px;border:1px solid #e2e8f0;">${escapeHtml(JSON.stringify(value, null, 2))}</pre>`;

@@ -78,7 +78,7 @@ export class BOQGenerator {
       }
       return [{
         category: "General",
-        item: cleaned.length > 500 ? cleaned.slice(0, 500) + "..." : cleaned,
+        item: cleaned.length > 50000 ? cleaned.slice(0, 50000) + "..." : cleaned,
         quantity: "",
         unit: "",
       }];
@@ -111,7 +111,19 @@ export class BOQGenerator {
     const start = text.indexOf("[");
     const end = text.lastIndexOf("]");
     if (start !== -1 && end !== -1 && end > start) {
-      return text.substring(start, end + 1).trim();
+      let depth = 0;
+      let actualEnd = end;
+      for (let i = start; i <= end; i++) {
+        if (text[i] === "[") depth++;
+        else if (text[i] === "]") {
+          depth--;
+          if (depth === 0) {
+            actualEnd = i;
+            break;
+          }
+        }
+      }
+      return text.substring(start, actualEnd + 1).trim();
     }
 
     return text.trim();

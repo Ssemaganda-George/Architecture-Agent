@@ -18,22 +18,34 @@ export class ConceptDesigner {
     try {
       const cleaned = this.extractJson(text);
       const parsed = JSON.parse(cleaned);
+      
+      let source = parsed;
+      if (parsed.conceptStatement && typeof parsed.conceptStatement === "object") {
+        source = parsed.conceptStatement;
+      }
+      
       const asString = (v: any) => {
         if (v === undefined || v === null) return "";
         if (typeof v === "object") return JSON.stringify(v);
         return String(v);
       };
       return {
-        conceptStatement: asString(parsed.conceptStatement),
-        designPhilosophy: asString(parsed.designPhilosophy),
+        conceptStatement: asString(source.conceptStatement ?? parsed.conceptStatement),
+        designPhilosophy: asString(source.designPhilosophy ?? parsed.designPhilosophy),
         moodBoard: [],
-        materialRecommendations: Array.isArray(parsed.materialRecommendations)
-          ? parsed.materialRecommendations.map(asString)
-          : [asString(parsed.materialRecommendations)].filter(Boolean),
-        colorPalette: Array.isArray(parsed.colorPalette) ? parsed.colorPalette.map(asString) : [asString(parsed.colorPalette)].filter(Boolean),
-        elevationIdeas: asString(parsed.elevationIdeas),
-        roofRecommendation: asString(parsed.roofRecommendation),
-        interiorConcept: asString(parsed.interiorConcept),
+        materialRecommendations: Array.isArray(source.materialRecommendations)
+          ? source.materialRecommendations.map(asString)
+          : Array.isArray(parsed.materialRecommendations)
+            ? parsed.materialRecommendations.map(asString)
+            : [asString(source.materialRecommendations ?? parsed.materialRecommendations)].filter(Boolean),
+        colorPalette: Array.isArray(source.colorPalette)
+          ? source.colorPalette.map(asString)
+          : Array.isArray(parsed.colorPalette)
+            ? parsed.colorPalette.map(asString)
+            : [asString(source.colorPalette ?? parsed.colorPalette)].filter(Boolean),
+        elevationIdeas: asString(source.elevationIdeas ?? parsed.elevationIdeas),
+        roofRecommendation: asString(source.roofRecommendation ?? parsed.roofRecommendation),
+        interiorConcept: asString(source.interiorConcept ?? parsed.interiorConcept),
       };
     } catch {
       return {
