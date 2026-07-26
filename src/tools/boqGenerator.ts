@@ -10,7 +10,7 @@ export class BOQGenerator {
 
   async generateBOQ(brief: ProjectBrief, context: string): Promise<BOQItem[]> {
     const prompt = `You are a quantity surveying specialist. Create a Bill of Quantities suitable for the building type in the brief (residential, commercial, industrial, institutional, etc.). Include relevant categories and items.\n\nUse ONLY Ugandan Shillings (UGX) for all rates and amounts. Use realistic 2024-2025 Ugandan market rates.\n\nProvide the response as valid JSON array items with category, item, quantity, unit, rate, amount, and optional notes.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
-    const response = await this.client.generateText(prompt, 2000);
+    const response = await this.client.generateText(prompt, 4000);
     return this.parseResponse(response.text);
   }
 
@@ -87,7 +87,7 @@ export class BOQGenerator {
 
   private extractObjectsFromArray(text: string): BOQItem[] {
     const items: BOQItem[] = [];
-    const regex = /\{\s*"category"\s*:\s*"([^"]+)"\s*,\s*"item"\s*:\s*"([^"]+)"\s*,\s*"quantity"\s*:\s*([^,]+)\s*,\s*"unit"\s*:\s*"([^"]+)"\s*,\s*"rate"\s*:\s*([^,]+)\s*,\s*"amount"\s*:\s*([^,\}]+)\s*\}\s*,?/g;
+    const regex = /\{\s*"category"\s*:\s*"([^"]+)"\s*,\s*"item"\s*:\s*"([^"]+)"\s*,\s*"quantity"\s*:\s*([^,]+)\s*,\s*"unit"\s*:\s*"([^"]+)"\s*,\s*"rate"\s*:\s*([^,]+)\s*,\s*"amount"\s*:\s*([^,\}]+)(?:\s*,\s*"notes"\s*:\s*"([^"]+)")?\s*\}\s*,?/g;
     let match;
     while ((match = regex.exec(text)) !== null) {
       items.push({
@@ -97,6 +97,7 @@ export class BOQGenerator {
         unit: match[4],
         rate: match[5].trim(),
         amount: match[6].trim(),
+        notes: match[7] ? match[7].trim() : undefined,
       });
     }
     return items;
