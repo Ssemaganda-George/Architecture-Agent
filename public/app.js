@@ -347,9 +347,26 @@ function escapeHtml(text) {
 function sanitizeLLMOutput(text) {
   if (!text) return text;
   return text
-    .replace(/<environment_details>[\s\S]*?<\/environment_details>/g, "")
-    .replace(/<environment_details[\s\S]*?<\/environment_details>/g, "")
+    .replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>/g, "")
     .trim();
+}
+
+function sanitizeResult(obj) {
+  if (!obj) return obj;
+  if (typeof obj === "string") {
+    return sanitizeLLMOutput(obj);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeResult);
+  }
+  if (typeof obj === "object") {
+    const out: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      out[key] = sanitizeResult(value);
+    }
+    return out;
+  }
+  return obj;
 }
 
 function renderMarkdown(text) {
@@ -617,7 +634,7 @@ async function runStandard() {
         body: JSON.stringify({ text }),
       });
     }
-    const result = await res.json();
+    const result = sanitizeResult(await res.json());
     if (!res.ok) {
       showError(result.error || "Request failed");
       return;
@@ -737,7 +754,7 @@ async function runChat() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, history: chatHistory.slice(0, -1) }),
     });
-    const result = await res.json();
+    const result = sanitizeResult(await res.json());
     removeLastAssistantBubble();
     if (!res.ok) {
       appendChatBubble("error", result.error || "Request failed");

@@ -9,7 +9,8 @@ export class BOQGenerator {
   }
 
   async generateBOQ(brief: ProjectBrief, context: string): Promise<BOQItem[]> {
-    const prompt = `You are a quantity surveying specialist. Create a Bill of Quantities suitable for the building type in the brief (residential, commercial, industrial, institutional, etc.). Include relevant categories and items.\n\nUse ONLY Ugandan Shillings (UGX) for all rates and amounts. Use realistic 2024-2025 Ugandan market rates.\n\nProvide the response as valid JSON array items with category, item, quantity, unit, rate, amount, and optional notes.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+    const budgetLine = brief.budget ? `\nIMPORTANT BUDGET CONSTRAINT: The total BOQ must not exceed ${brief.budget}. If the realistic total exceeds the budget, reduce scope or choose lower-cost materials and note the justification in the notes field for each affected item.` : "";
+    const prompt = `You are a quantity surveying specialist. Create a Bill of Quantities suitable for the building type in the brief (residential, commercial, industrial, institutional, etc.). Include relevant categories and items.\n\nUse ONLY Ugandan Shillings (UGX) for all rates and amounts. Use realistic 2024-2025 Ugandan market rates.${budgetLine}\n\nProvide the response as valid JSON array items with category, item, quantity, unit, rate, amount, and optional notes.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 4000);
     return this.parseResponse(response.text);
   }
