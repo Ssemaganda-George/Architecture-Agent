@@ -743,6 +743,7 @@ async function runChat() {
 }
 
 function switchMode(mode) {
+  if (currentMode === mode) return;
   currentMode = mode;
   modeTitle.textContent = modeTitles[mode] || mode;
   
@@ -756,6 +757,10 @@ function switchMode(mode) {
   document.querySelectorAll(".nav-step").forEach((el, idx) => {
     const isActive = pipelineModes[idx] === mode;
     el.classList.toggle("active", isActive);
+  });
+
+  document.querySelectorAll(".nav-item").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === mode);
   });
 
   document.querySelectorAll(".quick-access-btn").forEach((btn) => {
@@ -789,6 +794,14 @@ function switchMode(mode) {
   }
 }
 
+function routeFromHash() {
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  const mode = hash || "chat";
+  if (mode && modeTitles[mode]) {
+    switchMode(mode);
+  }
+}
+
 function autoResizeChatInput() {
   chatInput.style.height = "auto";
   chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + "px";
@@ -796,10 +809,10 @@ function autoResizeChatInput() {
 
 navItems.forEach((btn) => {
   btn.addEventListener("click", () => {
-    navItems.forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
     const mode = btn.dataset.mode;
-    switchMode(mode);
+    if (mode) {
+      window.location.hash = `#/${mode}`;
+    }
   });
 });
 
@@ -894,12 +907,7 @@ document.querySelectorAll(".mobile-menu-item").forEach((item) => {
   item.addEventListener("click", () => {
     const mode = item.dataset.mode;
     if (mode) {
-      switchMode(mode);
-      navItems.forEach((b) => b.classList.remove("active"));
-      const target = document.querySelector(`.nav-item[data-mode="${mode}"]`);
-      if (target) {
-        target.classList.add("active");
-      }
+      window.location.hash = `#/${mode}`;
     }
     closeMobileMenu();
   });
@@ -909,11 +917,13 @@ document.querySelectorAll(".quick-access-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const mode = btn.dataset.mode;
     if (mode) {
-      switchMode(mode);
-      document.querySelectorAll(".quick-access-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+      window.location.hash = `#/${mode}`;
     }
   });
 });
+
+window.addEventListener("hashchange", routeFromHash);
+
+routeFromHash();
 
 init();
