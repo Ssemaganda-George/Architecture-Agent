@@ -396,6 +396,14 @@ app.post("/api/download/dxf", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3003;
+
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  res.sendFile(require("path").join(process.cwd(), "public", "index.html"));
+});
+
 app.listen(PORT, () => {
   console.log(`Architect Agent UI ready at http://localhost:${PORT}`);
 });

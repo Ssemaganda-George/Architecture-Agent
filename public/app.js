@@ -746,6 +746,8 @@ function switchMode(mode) {
   if (currentMode === mode) return;
   currentMode = mode;
   modeTitle.textContent = modeTitles[mode] || mode;
+  const path = mode === "chat" ? "/" : `/${mode}`;
+  window.history.pushState({ mode }, "", path);
   
   const step = pipelineModes.indexOf(mode);
   if (step >= 0) {
@@ -794,9 +796,9 @@ function switchMode(mode) {
   }
 }
 
-function routeFromHash() {
-  const hash = window.location.hash.replace(/^#\/?/, "");
-  const mode = hash || "chat";
+function routeFromPath() {
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
+  const mode = path || "chat";
   if (mode && modeTitles[mode]) {
     switchMode(mode);
   }
@@ -811,7 +813,7 @@ navItems.forEach((btn) => {
   btn.addEventListener("click", () => {
     const mode = btn.dataset.mode;
     if (mode) {
-      window.location.hash = `#/${mode}`;
+      window.history.pushState({ mode }, "", `/${mode}`);
     }
   });
 });
@@ -907,7 +909,7 @@ document.querySelectorAll(".mobile-menu-item").forEach((item) => {
   item.addEventListener("click", () => {
     const mode = item.dataset.mode;
     if (mode) {
-      window.location.hash = `#/${mode}`;
+      window.history.pushState({ mode }, "", `/${mode}`);
     }
     closeMobileMenu();
   });
@@ -917,13 +919,16 @@ document.querySelectorAll(".quick-access-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const mode = btn.dataset.mode;
     if (mode) {
-      window.location.hash = `#/${mode}`;
+      const path = mode === "chat" ? "/" : `/${mode}`;
+      window.history.pushState({ mode }, "", path);
     }
   });
 });
 
-window.addEventListener("hashchange", routeFromHash);
+window.addEventListener("popstate", () => {
+  routeFromPath();
+});
 
-routeFromHash();
+routeFromPath();
 
 init();
