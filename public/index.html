@@ -134,7 +134,12 @@
             <div class="file-upload-area">
               <label for="file-input" class="file-label">Select file</label>
               <input type="file" id="file-input" accept=".txt,.md" />
-              <button class="btn btn-secondary" id="upload-btn">Upload (auto-chunk)</button>
+              <button class="btn btn-secondary upload-btn-disabled" id="upload-btn">Upload (auto-chunk)</button>
+            </div>
+            <div class="pin-area">
+              <label for="pin-input" class="file-label">PIN</label>
+              <input type="password" id="pin-input" placeholder="Enter PIN" autocomplete="current-password" />
+              <button class="btn btn-secondary" id="pin-submit-btn">Verify</button>
             </div>
             <div id="upload-progress" class="upload-progress" style="display:none;margin-top:12px;">
               <div id="upload-progress-bar" style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;"><div id="upload-progress-fill" style="height:100%;width:0;background:#06b6d4"></div></div>

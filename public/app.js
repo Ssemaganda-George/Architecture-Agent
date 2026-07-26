@@ -24,6 +24,11 @@ const tryExampleBtn = document.getElementById("try-example-btn");
 const hamburgerBtn = document.getElementById("hamburger-btn");
 const mobileMenuOverlay = document.getElementById("mobile-menu-overlay");
 const mobileMenuClose = document.getElementById("mobile-menu-close");
+const pinInput = document.getElementById("pin-input");
+const pinSubmitBtn = document.getElementById("pin-submit-btn");
+
+let pinVerified = false;
+const REQUIRED_PIN = "julie";
 
 let currentMode = "chat";
 let initialized = false;
@@ -842,6 +847,10 @@ if (tryExampleBtn) {
 }
 
 uploadBtn.addEventListener("click", async () => {
+  if (!pinVerified) {
+    showUploadResult("Please enter the PIN first.", "error");
+    return;
+  }
   const f = fileInput.files && fileInput.files[0];
   if (!f) {
     showUploadResult("Please choose a file to upload (.txt/.md)", "error");
@@ -861,6 +870,22 @@ uploadBtn.addEventListener("click", async () => {
     setTimeout(() => setUploadProgress(-1), 1500);
   }
 });
+
+if (pinSubmitBtn && pinInput) {
+  pinSubmitBtn.addEventListener("click", () => {
+    const val = (pinInput.value || "").trim().toLowerCase();
+    if (val === REQUIRED_PIN) {
+      pinVerified = true;
+      pinInput.classList.remove("pin-error");
+      uploadBtn.classList.remove("upload-btn-disabled");
+      showUploadResult("PIN verified. You can now upload files.", "success");
+      pinInput.value = "";
+    } else {
+      pinVerified = false;
+      showUploadResult("Incorrect PIN. Access denied.", "error");
+    }
+  });
+}
 
 promptInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
