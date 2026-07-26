@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "path";
 import { ArchitectAgent } from "./agent.js";
 import { GeminiClient } from "./geminiClient.js";
 import { VectorStore } from "./vectorStore.js";
@@ -401,7 +402,7 @@ app.get("*", (req, res) => {
   if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "Not found" });
   }
-  res.sendFile(require("path").join(process.cwd(), "public", "index.html"));
+  res.sendFile(path.join(process.cwd(), "public", "index.html"));
 });
 
 app.listen(PORT, () => {
