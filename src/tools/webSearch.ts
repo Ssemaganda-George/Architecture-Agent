@@ -9,7 +9,7 @@ export class WebSearchTool {
 
   async search(query: string): Promise<string> {
     if (!this.apiUrl || !this.apiKey) {
-      return `Web search disabled. Configure SEARCH_API_URL and SEARCH_API_KEY to enable external sourcing for: ${query}`;
+      return "";
     }
 
     const response = await fetch(this.apiUrl, {

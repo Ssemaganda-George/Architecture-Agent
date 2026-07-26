@@ -19,7 +19,7 @@ export class KnowledgeRetriever {
     const results = await this.store.search(query, topK);
     const docs = results.map((item) => item.doc);
     if (docs.length === 0) {
-      return "No local corpus context is available. Please ingest project and reference documents.";
+      return "";
     }
     return this.formatDocuments(docs);
   }
