@@ -25,7 +25,7 @@ const hamburgerBtn = document.getElementById("hamburger-btn");
 const mobileMenuOverlay = document.getElementById("mobile-menu-overlay");
 const mobileMenuClose = document.getElementById("mobile-menu-close");
 
-let currentMode = "brief";
+let currentMode = "chat";
 let initialized = false;
 let chatHistory = [];
 
