@@ -18,11 +18,6 @@ export class CostEstimator {
     try {
       const cleaned = this.extractJson(text);
       const parsed = JSON.parse(cleaned);
-      const asString = (v: any) => {
-        if (v === undefined || v === null) return "";
-        return String(v);
-      };
-      
       const anyParsed = parsed as any;
       let totalCost = anyParsed.totalCost;
       let currency = anyParsed.currency;
