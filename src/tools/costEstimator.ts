@@ -1,5 +1,5 @@
 import { GeminiClient } from "../geminiClient.js";
-import { CostBreakdown, ProjectBrief } from "../types.js";
+import { CostBreakdown, ProjectBrief, BOQItem } from "../types.js";
 
 export class CostEstimator {
   private client: GeminiClient;
@@ -8,9 +8,10 @@ export class CostEstimator {
     this.client = client;
   }
 
-  async estimateCost(brief: ProjectBrief, context: string): Promise<CostBreakdown> {
-    const budgetLine = brief.budget ? `\nBUDGET CONSTRAINT: The total cost must not exceed ${brief.budget}. If the realistic total exceeds the budget, reduce scope or choose lower-cost materials and explain the trade-offs in assumptions.` : "";
-    const prompt = `You are an expert construction cost estimator specializing in Ugandan construction. Using the brief below, estimate total cost in UGX.\n\nCRITICAL: Return ONLY a flat JSON object with these EXACT top-level fields and NOTHING ELSE:\n{\n  "totalCost": 123456789,\n  "currency": "UGX",\n  "labour": 12345678,\n  "materials": 12345678,\n  "equipment": 1234567,\n  "transport": 1234567,\n  "professionalFees": 1234567,\n  "contingency": 1234567,\n  "assumptions": "Short summary of key assumptions."\n}\n\nRULES:\n- Do NOT nest labour, materials, equipment, transport, professionalFees, or contingency under another object.\n- Do NOT include any other fields.\n- Do NOT wrap in markdown code fences.\n- All values must be numbers except assumptions which is a string.\n- totalCost must equal the sum of all other numeric fields.${budgetLine}\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+  async estimateCost(brief: ProjectBrief, context: string, boq: BOQItem[] = [], boqTotal = 0): Promise<CostBreakdown> {
+    const budgetLine = brief.budget ? `\nBUDGET CONSTRAINT: The total cost must not exceed ${brief.budget}.` : "";
+    const boqLine = boq.length > 0 ? `\n\nBill of Quantities (source of truth for costs):\n${JSON.stringify(boq, null, 2)}\n\nBOQ Total: ${boqTotal}` : "";
+    const prompt = `You are an expert construction cost estimator specializing in Ugandan construction. Using the brief and BOQ below, estimate total cost in UGX.\n\nCRITICAL: Return ONLY a flat JSON object with these EXACT top-level fields and NOTHING ELSE:\n{\n  "totalCost": 123456789,\n  "currency": "UGX",\n  "labour": 12345678,\n  "materials": 12345678,\n  "equipment": 1234567,\n  "transport": 1234567,\n  "professionalFees": 1234567,\n  "contingency": 1234567,\n  "assumptions": "Short summary of key assumptions."\n}\n\nRULES:\n- Do NOT nest labour, materials, equipment, transport, professionalFees, or contingency under another object.\n- Do NOT include any other fields.\n- Do NOT wrap in markdown code fences.\n- All values must be numbers except assumptions which is a string.\n- totalCost must equal the sum of all other numeric fields.\n- The cost estimate must be derived directly from the BOQ line items (sum quantities × rates + markup/contingency). The BOQ total should never exceed the estimate.${budgetLine}${boqLine}\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 900);
     return this.parseResponse(response.text);
   }

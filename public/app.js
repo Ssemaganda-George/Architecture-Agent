@@ -346,10 +346,12 @@ function escapeHtml(text) {
 
 function sanitizeLLMOutput(text) {
   if (!text) return text;
-  return text
-    .replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>\s*/g, "")
-    .replace(/<environment_details[^>]*>[\s\S]*/g, "")
-    .trim();
+  const cleaned = text.replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>/g, "");
+  const idx = cleaned.lastIndexOf("<environment_details");
+  if (idx !== -1) {
+    return cleaned.substring(0, idx).trim();
+  }
+  return cleaned.trim();
 }
 
 function sanitizeResult(obj) {

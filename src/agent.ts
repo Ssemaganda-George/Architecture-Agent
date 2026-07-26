@@ -205,10 +205,10 @@ export class ArchitectAgent {
     return this.boqGenerator.generateBOQ(brief, context);
   }
 
-  async estimateCost(brief: ProjectBrief): Promise<CostBreakdown> {
+  async estimateCost(brief: ProjectBrief, boq: BOQItem[] = [], boqTotal = 0): Promise<CostBreakdown> {
     if (this.mockMode) return this.mockCost();
     const context = await this.retriever.retrieveCorpusContext(brief.projectSummary);
-    return this.costEstimator.estimateCost(brief, context);
+    return this.costEstimator.estimateCost(brief, context, boq, boqTotal);
   }
 
   async recommendSuppliers(brief: ProjectBrief): Promise<SupplierRecommendation[]> {
@@ -237,14 +237,34 @@ export class ArchitectAgent {
 
   async executeWorkflow(rawBrief: string): Promise<string[]> {
     const brief = await this.interpretBrief(rawBrief);
-    const [concept, spacePlan, boq, cost, suppliers, structure] = await Promise.all([
+    const [concept, spacePlan, boq, suppliers, structure] = await Promise.all([
       this.createConcept(brief),
       this.planSpace(brief),
       this.generateBOQ(brief),
-      this.estimateCost(brief),
       this.recommendSuppliers(brief),
       this.adviseStructure(brief),
     ]);
+
+    let boqTotal = boq.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    if (brief.budget && boqTotal > Number(brief.budget)) {
+      const scale = Number(brief.budget) / boqTotal;
+      const scaled = boq.map((item) => {
+        const qty = Number(item.quantity) || 0;
+        const rate = Number(item.rate) || 0;
+        const scaledQty = Math.round(qty * scale * 100) / 100;
+        const amount = Math.round(scaledQty * rate);
+        return {
+          ...item,
+          quantity: String(scaledQty),
+          rate: item.rate !== undefined ? String(rate) : undefined,
+          amount: item.amount !== undefined ? String(amount) : undefined,
+        };
+      });
+      boqTotal = scaled.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+      boq.push(...scaled);
+    }
+
+    const cost = await this.estimateCost(brief, boq, boqTotal);
 
     const report = await this.generateProjectReport(brief, concept, spacePlan, boq, cost, suppliers, structure);
     return this.fileTool.generateProjectPackage(brief, concept, spacePlan, boq, cost, suppliers, structure, report);
