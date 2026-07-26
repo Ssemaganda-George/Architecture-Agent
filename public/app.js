@@ -175,6 +175,7 @@ function renderBOQ(data) {
   }
 
   html += `<div class="table-wrapper"><table><thead><tr><th>Category</th><th>Item</th><th>Qty</th><th>Unit</th><th>Rate (UGX)</th><th>Amount (UGX)</th></tr></thead><tbody>`;
+  let totalAmount = 0;
   items.forEach((item) => {
     const itemText = String(item.item ?? "");
     let itemCell;
@@ -188,8 +189,13 @@ function renderBOQ(data) {
     } else {
       itemCell = escapeHtml(itemText);
     }
+    const amountVal = Number(item.amount ?? 0);
+    if (!Number.isNaN(amountVal)) {
+      totalAmount += amountVal;
+    }
     html += `<tr><td>${escapeHtml(item.category)}</td><td>${itemCell}</td><td class="num">${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td class="num">${escapeHtml(item.rate ?? "")}</td><td class="num">${escapeHtml(item.amount ?? "")}</td></tr>`;
   });
+  html += `<tr class="total-row"><td colspan="5">Total</td><td class="num">${totalAmount.toLocaleString()}</td></tr>`;
   html += "</tbody></table></div>";
   return html;
 }

@@ -804,6 +804,11 @@ html, body {
   font-variant-numeric: tabular-nums;
 }
 
+.output-body .table-wrapper .total-row {
+  background: #f1f5f9;
+  font-weight: 700;
+}
+
 .output-body .download-actions {
   margin: 12px 0;
   display: flex;
