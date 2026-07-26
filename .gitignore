@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+data/vectors.json
+output
+training/outputs
+training/evaluations
+.DS_Store
+*.log

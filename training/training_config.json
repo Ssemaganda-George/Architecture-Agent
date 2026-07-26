@@ -1,0 +1,14 @@
+{
+  "training_file": "training/data/training_data_clean.jsonl",
+  "validation_file": "training/data/validation_data.jsonl",
+  "base_model": "gpt-4o-mini",
+  "provider": "openai",
+  "hyperparameters": {
+    "n_epochs": 3,
+    "batch_size": 4,
+    "learning_rate_multiplier": 0.2,
+    "max_tokens": 1024
+  },
+  "output_dir": "training/outputs",
+  "evaluation_dir": "training/evaluations"
+}

@@ -1,0 +1,31 @@
+{
+  "name": "architect-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --loader ts-node/esm src/index.ts",
+    "ingest": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --loader ts-node/esm src/ingest.ts",
+    "serve": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --loader ts-node/esm src/server.ts",
+    "web": "npm run build && NODE_TLS_REJECT_UNAUTHORIZED=0 node dist/server.js",
+    "training:split": "node training/split_dataset.js",
+    "training:train": "node training/train.js",
+    "training:evaluate": "node training/evaluate.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.22.2",
+    "form-data": "^4.0.6"
+    ,"exceljs": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.5.4"
+  }
+}
