@@ -344,6 +344,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function sanitizeLLMOutput(text) {
+  if (!text) return text;
+  return text
+    .replace(/<environment_details>[\s\S]*?<\/environment_details>/g, "")
+    .replace(/<environment_details[\s\S]*?<\/environment_details>/g, "")
+    .trim();
+}
+
 function renderMarkdown(text) {
   const escaped = escapeHtml(text);
   const lines = escaped.split("\n");
@@ -448,7 +456,7 @@ function appendChatBubble(role, text) {
   avatar.textContent = role === "user" ? "You" : "AA";
   const bubble = document.createElement("div");
   bubble.className = "chat-bubble";
-  bubble.innerHTML = role === "error" ? escapeHtml(text) : renderMarkdown(text);
+  bubble.innerHTML = role === "error" ? escapeHtml(text) : renderMarkdown(sanitizeLLMOutput(text));
   wrapper.appendChild(avatar);
   wrapper.appendChild(bubble);
   chatMessages.appendChild(wrapper);

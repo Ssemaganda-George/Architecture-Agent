@@ -182,8 +182,16 @@ export class GeminiClient {
     const response = await this.requestWithRetry(this.generationUrl, body);
 
     const result = await response.json();
-    const text = this.extractGenerationText(result);
+    const text = this.sanitizeLLMOutput(this.extractGenerationText(result));
     return { text };
+  }
+
+  private sanitizeLLMOutput(text: string): string {
+    if (!text) return text;
+    return text
+      .replace(/<environment_details>[\s\S]*?<\/environment_details>/g, "")
+      .replace(/<environment_details[\s\S]*?<\/environment_details>/g, "")
+      .trim();
   }
 
   async embedText(input: string): Promise<number[]> {
