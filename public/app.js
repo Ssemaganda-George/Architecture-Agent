@@ -487,17 +487,51 @@ async function init() {
   try {
     setStatus("", "Initializing...");
     const res = await fetch("/api/init", { method: "POST" });
-    if (!res.ok) throw new Error("Failed to initialize agent");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to initialize agent");
+    }
     initialized = true;
     setStatus("ready", "Ready");
     appendWelcomeMessage();
   } catch (error) {
     setStatus("", "Error");
-    const welcome = document.createElement("div");
-    welcome.className = "chat-message error";
-    welcome.innerHTML = `<div class="chat-avatar">!</div><div class="chat-bubble">${escapeHtml(error.message)}</div>`;
-    if (chatEmpty) chatEmpty.remove();
-    chatMessages.appendChild(welcome);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
+    if (currentMode !== "chat") {
+      output.innerHTML = `
+        <div class="error-message" style="padding: 20px; border-radius: 12px; background: #fef2f2; border: 1px solid #fecaca;">
+          <div style="font-weight: 700; color: #991b1b; margin-bottom: 12px; font-size: 16px;">⚠️ Initialization Failed</div>
+          <div style="color: #991b1b; line-height: 1.6; margin-bottom: 16px;">${escapeHtml(errorMessage)}</div>
+          <div style="color: #991b1b; font-size: 13px; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #fecaca;">
+            <strong>Common fixes:</strong><br>
+            1. Check that environment variables are set in your hosting dashboard<br>
+            2. Verify your API key is valid and has available credits<br>
+            3. Ensure the model name is correct for your provider<br>
+            4. Check the service logs for detailed error messages
+          </div>
+        </div>
+      `;
+    } else {
+      const welcome = document.createElement("div");
+      welcome.className = "chat-message error";
+      welcome.innerHTML = `
+        <div class="chat-avatar">!</div>
+        <div class="chat-bubble">
+          <div style="font-weight: 700; margin-bottom: 8px;">⚠️ Initialization Failed</div>
+          <div style="margin-bottom: 12px;">${escapeHtml(errorMessage)}</div>
+          <div style="font-size: 12px; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #fecaca;">
+            <strong>Common fixes:</strong><br>
+            1. Check environment variables in hosting dashboard<br>
+            2. Verify API key is valid with credits<br>
+            3. Check model name is correct<br>
+            4. Review service logs
+          </div>
+        </div>
+      `;
+      if (chatEmpty) chatEmpty.remove();
+      chatMessages.appendChild(welcome);
+    }
   }
 }
 

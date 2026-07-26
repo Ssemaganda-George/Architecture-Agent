@@ -72,17 +72,31 @@ function extractTags(text: string, topK = 6) {
 
 app.post("/api/init", async (_req, res) => {
   try {
-    // Idempotent: avoid recreating the agent/store (which reloads vectors.json
-    // from disk and replaces the in-memory store) if already initialized.
-    // Repeated calls previously caused ingestion progress to be lost when the
-    // store was reloaded mid-ingestion.
     if (!agent || !store) {
       await initAgent();
     }
     res.json({ status: "ready" });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Initialization failed";
-    res.status(500).json({ error: message });
+    let userMessage = "Failed to initialize agent.";
+    
+    if (message.includes("No LLM provider configured")) {
+      userMessage = "Configuration error: No LLM API key found. Please set OPENROUTER_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in environment variables.";
+    } else if (message.includes("API key is required")) {
+      userMessage = `Configuration error: ${message}`;
+    } else if (message.includes("quota exceeded") || message.includes("Rate limit")) {
+      userMessage = `API quota exceeded: ${message}. Please check your plan/billing or try again later.`;
+    } else if (message.includes("does not exist") || message.includes("model_not_found")) {
+      userMessage = `Model error: ${message}. Please check your model name in environment variables.`;
+    } else if (message.includes("ENOENT") || message.includes("ECONNREFUSED") || message.includes("ETIMEDOUT") || message.includes("network")) {
+      userMessage = `Network error: ${message}. Please check your internet connection or API endpoint configuration.`;
+    } else if (message.includes("Failed to verify")) {
+      userMessage = `Service unavailable: ${message}. The AI service may be down or unreachable.`;
+    } else {
+      userMessage = `Initialization error: ${message}`;
+    }
+    
+    res.status(500).json({ error: userMessage });
   }
 });
 
