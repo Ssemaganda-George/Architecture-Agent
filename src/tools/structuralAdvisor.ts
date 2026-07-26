@@ -9,7 +9,7 @@ export class StructuralAdvisor {
   }
 
   async suggestStructure(brief: ProjectBrief, context: string): Promise<StructuralSuggestion> {
-    const prompt = `You are a structural design advisor. Provide preliminary structural recommendations for foundation type, slab thickness, column sizes, beam sizes, and roof framing. Include a clear licensed engineer disclaimer.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+    const prompt = `You are a structural design advisor. Provide preliminary structural recommendations for a ${brief.buildingType || 'building'} project. Include foundation type, slab thickness, column sizes, beam sizes, and roof framing. Include a clear licensed engineer disclaimer.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 700);
     return this.parseResponse(response.text);
   }

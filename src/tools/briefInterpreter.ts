@@ -23,7 +23,7 @@ export class BriefInterpreter {
   }
 
   async interpret(rawBrief: string, context: string): Promise<ProjectBrief> {
-    const prompt = `You are an expert construction assistant specialized in architectural design, cost estimation, and local Ugandan construction context.\n\nClient brief:\n${rawBrief}\n\nRelevant context:\n${context}\n\nExtract the following project brief fields in JSON format exactly as shown: projectSummary, buildingType, bedrooms, style, budget, plotSize, climate, orientation, sustainabilityRecommendations, targetUsers, constraints.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.`;
+    const prompt = `You are an expert construction assistant specialized in architectural design, cost estimation, and local Ugandan construction context.\n\nClient brief:\n${rawBrief}\n\nRelevant context:\n${context}\n\nExtract the following project brief fields in JSON format exactly as shown: projectSummary, buildingType, bedrooms (use 0 if not applicable), style, budget, plotSize, climate, orientation, sustainabilityRecommendations, targetUsers, constraints.\n\nFor buildingType, use one of: Residential, Commercial, Industrial, Institutional, Mixed-Use, Hospitality, Healthcare, Education, Religious, Civic.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.`;
     const response = await this.client.generateText(prompt, 600);
     return this.parseResponse(response.text);
   }

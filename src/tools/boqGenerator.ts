@@ -9,7 +9,7 @@ export class BOQGenerator {
   }
 
   async generateBOQ(brief: ProjectBrief, context: string): Promise<BOQItem[]> {
-    const prompt = `You are a quantity surveying specialist specializing in Ugandan construction. Create a Bill of Quantities for the project brief below with categories Excavation, Concrete, Masonry, Roofing, Finishes, Plumbing, Electrical, Painting.\n\nUse ONLY Ugandan Shillings (UGX) for all rates and amounts. Use realistic 2024-2025 Ugandan market rates:\n- Excavation: 15,000-25,000 UGX per m³\n- Concrete (ready mix): 120,000-180,000 UGX per m³\n- Common bricks: 800-1,200 UGX each\n- Cement blocks: 1,500-2,500 UGX each\n- Roofing iron sheets: 25,000-40,000 UGX per m²\n- Plastering: 8,000-15,000 UGX per m²\n- Floor tiles: 15,000-30,000 UGX per m²\n- PVC water pipes: 8,000-12,000 UGX per metre\n- Electrical wiring: 5,000-10,000 UGX per metre\n- Painting: 10,000-18,000 UGX per m²\n\nProvide the response as valid JSON array items with category, item, quantity, unit, rate, amount, and optional notes.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+    const prompt = `You are a quantity surveying specialist. Create a Bill of Quantities suitable for the building type in the brief (residential, commercial, industrial, institutional, etc.). Include relevant categories and items.\n\nUse ONLY Ugandan Shillings (UGX) for all rates and amounts. Use realistic 2024-2025 Ugandan market rates.\n\nProvide the response as valid JSON array items with category, item, quantity, unit, rate, amount, and optional notes.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 2000);
     return this.parseResponse(response.text);
   }
@@ -30,7 +30,7 @@ export class BOQGenerator {
       }
       const asString = (v: any) => {
         if (v === undefined || v === null) return "";
-        if (typeof v === "number") return String(v);
+        if (typeof v === "object") return JSON.stringify(v);
         return String(v);
       };
       return items.map((item: any) => ({
@@ -45,15 +45,9 @@ export class BOQGenerator {
     } catch {
       const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
       
-      if (cleaned.startsWith("[") && !cleaned.endsWith("]")) {
-        try {
-          const partialItems = this.extractObjectsFromArray(cleaned);
-          if (partialItems.length > 0) {
-            return partialItems;
-          }
-        } catch {
-          // fall through to fallback
-        }
+      const partialItems = this.extractObjectsFromArray(cleaned);
+      if (partialItems.length > 0) {
+        return partialItems;
       }
 
       const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
@@ -63,14 +57,19 @@ export class BOQGenerator {
         try {
           const parsed = JSON.parse(jsonStr);
           if (Array.isArray(parsed)) {
+            const asString = (v: any) => {
+              if (v === undefined || v === null) return "";
+              if (typeof v === "object") return JSON.stringify(v);
+              return String(v);
+            };
             return parsed.map((item: any) => ({
-              category: String(item.category ?? ""),
-              item: String(item.item ?? ""),
-              quantity: String(item.quantity ?? ""),
-              unit: String(item.unit ?? ""),
-              rate: item.rate != null ? String(item.rate) : undefined,
-              amount: item.amount != null ? String(item.amount) : undefined,
-              notes: item.notes != null ? String(item.notes) : undefined,
+              category: asString(item.category),
+              item: asString(item.item),
+              quantity: asString(item.quantity),
+              unit: asString(item.unit),
+              rate: item.rate != null ? asString(item.rate) : undefined,
+              amount: item.amount != null ? asString(item.amount) : undefined,
+              notes: item.notes != null ? asString(item.notes) : undefined,
             }));
           }
         } catch {

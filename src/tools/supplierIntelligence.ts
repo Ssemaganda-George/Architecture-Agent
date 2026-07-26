@@ -9,7 +9,7 @@ export class SupplierIntelligence {
   }
 
   async recommendSuppliers(brief: ProjectBrief, context: string): Promise<SupplierRecommendation[]> {
-    const prompt = `You are a procurement and supplier analyst. Recommend suppliers for cement, steel, roofing, tiles, paint, timber, plumbing, and electrical materials based on the project brief and local Ugandan construction market. Return a JSON array with materialCategory, supplierName, price, location, contact, availability, source, and lastUpdated.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+    const prompt = `You are a procurement and supplier analyst. Recommend suppliers for materials appropriate to this ${brief.buildingType || 'construction'} project based on the project brief and local Ugandan construction market. Return a JSON array with materialCategory, supplierName, price, location, contact, availability, source, and lastUpdated.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 900);
     return this.parseResponse(response.text);
   }

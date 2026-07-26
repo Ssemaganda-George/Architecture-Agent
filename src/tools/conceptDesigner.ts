@@ -9,7 +9,7 @@ export class ConceptDesigner {
   }
 
   async generateConcept(brief: ProjectBrief, context: string): Promise<ConceptDesign> {
-    const prompt = `You are a construction and architecture specialist. Use the brief below to generate a concept design package. Include conceptStatement, designPhilosophy, materialRecommendations, colorPalette, elevationIdeas, roofRecommendation, and interiorConcept.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
+    const prompt = `You are a construction and architecture specialist. Use the brief below to generate a concept design package suitable for the building type (residential, commercial, industrial, institutional, etc.). Include conceptStatement, designPhilosophy, materialRecommendations, colorPalette, elevationIdeas, roofRecommendation, and interiorConcept.\n\nReturn ONLY valid JSON. Do not wrap it in markdown code fences or include any extra text.\n\nBrief:\n${JSON.stringify(brief, null, 2)}\n\nContext:\n${context}`;
     const response = await this.client.generateText(prompt, 900);
     return this.parseResponse(response.text);
   }
@@ -18,17 +18,22 @@ export class ConceptDesigner {
     try {
       const cleaned = this.extractJson(text);
       const parsed = JSON.parse(cleaned);
+      const asString = (v: any) => {
+        if (v === undefined || v === null) return "";
+        if (typeof v === "object") return JSON.stringify(v);
+        return String(v);
+      };
       return {
-        conceptStatement: String(parsed.conceptStatement ?? ""),
-        designPhilosophy: String(parsed.designPhilosophy ?? ""),
+        conceptStatement: asString(parsed.conceptStatement),
+        designPhilosophy: asString(parsed.designPhilosophy),
         moodBoard: [],
         materialRecommendations: Array.isArray(parsed.materialRecommendations)
-          ? parsed.materialRecommendations.map(String)
-          : [String(parsed.materialRecommendations ?? "")].filter(Boolean),
-        colorPalette: Array.isArray(parsed.colorPalette) ? parsed.colorPalette.map(String) : [String(parsed.colorPalette ?? "")].filter(Boolean),
-        elevationIdeas: String(parsed.elevationIdeas ?? ""),
-        roofRecommendation: String(parsed.roofRecommendation ?? ""),
-        interiorConcept: String(parsed.interiorConcept ?? ""),
+          ? parsed.materialRecommendations.map(asString)
+          : [asString(parsed.materialRecommendations)].filter(Boolean),
+        colorPalette: Array.isArray(parsed.colorPalette) ? parsed.colorPalette.map(asString) : [asString(parsed.colorPalette)].filter(Boolean),
+        elevationIdeas: asString(parsed.elevationIdeas),
+        roofRecommendation: asString(parsed.roofRecommendation),
+        interiorConcept: asString(parsed.interiorConcept),
       };
     } catch {
       return {
