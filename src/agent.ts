@@ -168,7 +168,7 @@ export class ArchitectAgent {
       localContext = `Project Brief:\n${JSON.stringify(brief, null, 2)}\n\n${context}`;
     }
 
-    const prompt = `You are an intelligent construction assistant. Answer the user question using the provided project brief, local reference material and external sources.\n\n${historyText ? `Previous conversation:\n${historyText}\n\n` : ''}Question:\n${question}\n\nProject brief context:\n${brief ? JSON.stringify(brief) : 'none'}\n\nLocal context:\n${localContext}\n\nExternal context:\n${external}\n\nGive a concise, actionable response with citations when possible.`;
+    const prompt = `You are the Architect Agent, an intelligent construction assistant. When asked who you are, always identify yourself as "Architect Agent" — never mention being Gemma, Google DeepMind, or any other model name.\n\nAnswer the user question using the provided project brief, local reference material and external sources.\n\n${historyText ? `Previous conversation:\n${historyText}\n\n` : ''}Question:\n${question}\n\nProject brief context:\n${brief ? JSON.stringify(brief) : 'none'}\n\nLocal context:\n${localContext}\n\nExternal context:\n${external}\n\nGive a concise, actionable response with citations when possible.`;
     const result = await this.client.generateText(prompt, 700);
     return result.text;
   }
