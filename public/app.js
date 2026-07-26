@@ -3,6 +3,7 @@ const runBtn = document.getElementById("run-btn");
 const runText = document.getElementById("run-text");
 const output = document.getElementById("output");
 const modeTitle = document.getElementById("mode-title");
+const modeSubtitle = document.getElementById("mode-subtitle");
 const statusBadge = document.getElementById("status-badge");
 const statusText = document.getElementById("status-text");
 const navItems = document.querySelectorAll(".nav-item");
@@ -13,11 +14,13 @@ const chatMessages = document.getElementById("chat-messages");
 const chatEmpty = document.getElementById("chat-empty");
 const chatInput = document.getElementById("chat-input");
 const chatSendBtn = document.getElementById("chat-send-btn");
+const chatSuggestions = document.getElementById("chat-suggestions");
 const fileInput = document.getElementById("file-input");
 const uploadBtn = document.getElementById("upload-btn");
 const uploadProgress = document.getElementById("upload-progress");
 const uploadProgressFill = document.getElementById("upload-progress-fill");
 const uploadProgressText = document.getElementById("upload-progress-text");
+const tryExampleBtn = document.getElementById("try-example-btn");
 
 let currentMode = "brief";
 let initialized = false;
@@ -35,6 +38,21 @@ const modeTitles = {
   corpus: "Dataset",
   chat: "Chat",
 };
+
+const modeDescriptions = {
+  brief: "Project brief",
+  concept: "Concept design",
+  space: "Space plan",
+  boq: "Bill of quantities",
+  cost: "Cost estimate",
+  suppliers: "Supplier recommendations",
+  structure: "Structural suggestions",
+  workflow: "Workflow results",
+  corpus: "Dataset",
+  chat: "Chat",
+};
+
+const pipelineModes = ["brief", "concept", "space", "boq", "cost"];
 
 const promptPlaceholders = {
   brief: "Describe your project, for example: I need a modern 4-bedroom family home on a 50x100 ft plot with a budget of UGX 250 million.",
@@ -77,6 +95,10 @@ function setLoading(isLoading, isChat = false) {
 
 function showLoadingSkeleton() {
   output.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-secondary);">
+      <span class="spinner-dark"></span>
+      <span>Generating... usually takes 15-30s</span>
+    </div>
     <div class="loading-skeleton">
       <div class="skeleton-line skeleton-title"></div>
       <div class="skeleton-line"></div>
@@ -403,7 +425,7 @@ function clearChat() {
 function appendWelcomeMessage() {
   const welcome = document.createElement("div");
   welcome.className = "chat-message assistant";
-  welcome.innerHTML = `<div class="chat-avatar">AA</div><div class="chat-bubble">${renderMarkdown("Hello! I am the Architect Agent. Ask me anything about architecture, construction, or design.")}</div>`;
+  welcome.innerHTML = `<div class="chat-avatar">AA</div><div class="chat-bubble">${renderMarkdown("👋 Hello! I'm your **Architect Agent**. I can help you with:\n\n• **Design ideas** — concept, space planning, and layouts\n• **Construction guidance** — materials, costs, and regulations\n• **Project planning** — BOQ, timelines, and budgeting\n\nTry asking me anything, or pick a suggestion below!")}</div>`;
   chatMessages.appendChild(welcome);
 }
 
@@ -428,7 +450,12 @@ function appendChatBubble(role, text) {
 function setChatLoading(isLoading) {
   setLoading(isLoading, true);
   if (isLoading) {
-    appendChatBubble("assistant", "Thinking...");
+    const typing = document.createElement("div");
+    typing.className = "chat-message assistant";
+    typing.id = "typing-indicator";
+    typing.innerHTML = `<div class="chat-avatar">AA</div><div class="chat-bubble typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+    chatMessages.appendChild(typing);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 }
 
@@ -482,6 +509,11 @@ async function uploadFileInChunks(file, opts = {}) {
 }
 
 function removeLastAssistantBubble() {
+  const typing = document.getElementById("typing-indicator");
+  if (typing) {
+    typing.remove();
+    return;
+  }
   const messages = chatMessages.querySelectorAll(".chat-message.assistant");
   const last = messages[messages.length - 1];
   if (last && last.querySelector(".chat-bubble")?.textContent === "Thinking...") {
@@ -677,6 +709,11 @@ async function runChat() {
   autoResizeChatInput();
   appendChatBubble("user", text);
   chatHistory.push({ role: "user", text });
+  
+  if (chatSuggestions) {
+    chatSuggestions.classList.add("hidden");
+  }
+  
   setChatLoading(true);
   try {
     const res = await fetch("/api/chat", {
@@ -705,6 +742,18 @@ async function runChat() {
 function switchMode(mode) {
   currentMode = mode;
   modeTitle.textContent = modeTitles[mode] || mode;
+  
+  const step = pipelineModes.indexOf(mode);
+  if (step >= 0) {
+    modeSubtitle.textContent = `Step ${step + 1} of 5 — ${modeDescriptions[mode]}`;
+  } else {
+    modeSubtitle.textContent = modeDescriptions[mode] || "";
+  }
+
+  document.querySelectorAll(".nav-step").forEach((el, idx) => {
+    const isActive = pipelineModes[idx] === mode;
+    el.classList.toggle("active", isActive);
+  });
 
   if (mode === "chat") {
     standardView.classList.add("hidden");
@@ -715,6 +764,9 @@ function switchMode(mode) {
     }
     promptInput.value = "";
     output.innerHTML = '<div class="empty-state">Your results will appear here.</div>';
+    if (chatSuggestions) {
+      chatSuggestions.classList.remove("hidden");
+    }
   } else if (mode === "corpus") {
     standardView.classList.add("hidden");
     chatView.classList.add("hidden");
@@ -746,6 +798,25 @@ navItems.forEach((btn) => {
 
 runBtn.addEventListener("click", runStandard);
 chatSendBtn.addEventListener("click", runChat);
+
+if (chatSuggestions) {
+  chatSuggestions.querySelectorAll(".suggestion-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const prompt = chip.dataset.prompt;
+      if (prompt) {
+        chatInput.value = prompt;
+        runChat();
+      }
+    });
+  });
+}
+
+if (tryExampleBtn) {
+  tryExampleBtn.addEventListener("click", () => {
+    promptInput.value = "I want to construct a 6-floor parking garage with 100 cars per floor, car ramps, and a car elevator.";
+    promptInput.focus();
+  });
+}
 
 uploadBtn.addEventListener("click", async () => {
   const f = fileInput.files && fileInput.files[0];
