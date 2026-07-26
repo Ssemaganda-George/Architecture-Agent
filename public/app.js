@@ -814,6 +814,7 @@ navItems.forEach((btn) => {
     const mode = btn.dataset.mode;
     if (mode) {
       window.history.pushState({ mode }, "", `/${mode}`);
+      switchMode(mode);
     }
   });
 });
@@ -910,6 +911,7 @@ document.querySelectorAll(".mobile-menu-item").forEach((item) => {
     const mode = item.dataset.mode;
     if (mode) {
       window.history.pushState({ mode }, "", `/${mode}`);
+      switchMode(mode);
     }
     closeMobileMenu();
   });
@@ -921,6 +923,7 @@ document.querySelectorAll(".quick-access-btn").forEach((btn) => {
     if (mode) {
       const path = mode === "chat" ? "/" : `/${mode}`;
       window.history.pushState({ mode }, "", path);
+      switchMode(mode);
     }
   });
 });
