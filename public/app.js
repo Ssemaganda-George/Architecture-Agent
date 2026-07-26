@@ -21,6 +21,9 @@ const uploadProgress = document.getElementById("upload-progress");
 const uploadProgressFill = document.getElementById("upload-progress-fill");
 const uploadProgressText = document.getElementById("upload-progress-text");
 const tryExampleBtn = document.getElementById("try-example-btn");
+const hamburgerBtn = document.getElementById("hamburger-btn");
+const mobileMenuOverlay = document.getElementById("mobile-menu-overlay");
+const mobileMenuClose = document.getElementById("mobile-menu-close");
 
 let currentMode = "brief";
 let initialized = false;
@@ -755,6 +758,10 @@ function switchMode(mode) {
     el.classList.toggle("active", isActive);
   });
 
+  document.querySelectorAll(".quick-access-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.mode === mode);
+  });
+
   if (mode === "chat") {
     standardView.classList.add("hidden");
     corpusView.classList.add("hidden");
@@ -854,5 +861,59 @@ chatInput.addEventListener("keydown", (e) => {
 });
 
 chatInput.addEventListener("input", autoResizeChatInput);
+
+function openMobileMenu() {
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.classList.add("open");
+  }
+}
+
+function closeMobileMenu() {
+  if (mobileMenuOverlay) {
+    mobileMenuOverlay.classList.remove("open");
+  }
+}
+
+if (hamburgerBtn) {
+  hamburgerBtn.addEventListener("click", openMobileMenu);
+}
+
+if (mobileMenuClose) {
+  mobileMenuClose.addEventListener("click", closeMobileMenu);
+}
+
+if (mobileMenuOverlay) {
+  mobileMenuOverlay.addEventListener("click", (e) => {
+    if (e.target === mobileMenuOverlay) {
+      closeMobileMenu();
+    }
+  });
+}
+
+document.querySelectorAll(".mobile-menu-item").forEach((item) => {
+  item.addEventListener("click", () => {
+    const mode = item.dataset.mode;
+    if (mode) {
+      switchMode(mode);
+      navItems.forEach((b) => b.classList.remove("active"));
+      const target = document.querySelector(`.nav-item[data-mode="${mode}"]`);
+      if (target) {
+        target.classList.add("active");
+      }
+    }
+    closeMobileMenu();
+  });
+});
+
+document.querySelectorAll(".quick-access-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const mode = btn.dataset.mode;
+    if (mode) {
+      switchMode(mode);
+      document.querySelectorAll(".quick-access-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+  });
+});
 
 init();

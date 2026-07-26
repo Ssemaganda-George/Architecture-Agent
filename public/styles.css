@@ -175,6 +175,192 @@ html, body {
   gap: 12px;
 }
 
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hamburger-btn:hover {
+  background: var(--bg);
+  border-color: var(--border-strong);
+}
+
+.mobile-quick-access {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.quick-access-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.quick-access-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.quick-access-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.mobile-quick-access .status-badge {
+  margin-left: auto;
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: 1000;
+  display: none;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0;
+}
+
+.mobile-menu-overlay.open {
+  display: flex;
+}
+
+.mobile-menu-panel {
+  width: 280px;
+  height: 100%;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  animation: slide-in 0.2s ease-out;
+}
+
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mobile-menu-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+}
+
+.mobile-menu-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mobile-menu-close:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.mobile-menu-item:hover {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.mobile-menu-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.mobile-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-menu-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  padding: 8px 14px 4px;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 12px;
+}
+
 .main-header h2 {
   font-size: 14px;
   font-weight: 600;
@@ -1058,6 +1244,10 @@ html, body {
     display: none;
   }
 
+  .sidebar-nav {
+    display: none;
+  }
+
   .nav-item {
     flex-shrink: 0;
     flex-direction: column;
@@ -1108,6 +1298,22 @@ html, body {
     display: none;
   }
 
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .mobile-quick-access {
+    display: flex;
+  }
+
+  .main-header {
+    padding: 10px 16px;
+  }
+
+  .main-header h2 {
+    font-size: 13px;
+  }
+
   .standard-view {
     padding: 16px;
   }
@@ -1122,9 +1328,5 @@ html, body {
 
   .mode-subtitle {
     display: none;
-  }
-
-  .main-header {
-    padding: 12px 16px;
   }
 }
