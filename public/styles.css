@@ -175,6 +175,12 @@ html, body {
   gap: 12px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .hamburger-btn {
   display: none;
   align-items: center;
@@ -1364,5 +1370,14 @@ html, body {
 
   .mode-subtitle {
     display: none;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .status-badge {
+    font-size: 10px;
+    padding: 4px 10px;
   }
 }

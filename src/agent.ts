@@ -175,10 +175,17 @@ export class ArchitectAgent {
 
   private sanitizeResponse(text: string): string {
     if (!text) return text;
-    return text
-      .replace(/<environment_details>[\s\S]*?<\/environment_details>/g, "")
-      .replace(/<environment_details[\s\S]*?<\/environment_details>/g, "")
-      .trim();
+    let cleaned = text;
+    let prev = "";
+    while (prev !== cleaned) {
+      prev = cleaned;
+      cleaned = cleaned.replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>/g, "");
+    }
+    const idx = cleaned.lastIndexOf("<environment_details");
+    if (idx !== -1) {
+      cleaned = cleaned.substring(0, idx);
+    }
+    return cleaned.trim();
   }
 
   async interpretBrief(rawBrief: string): Promise<ProjectBrief> {

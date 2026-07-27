@@ -75,7 +75,10 @@ const promptPlaceholders = {
 };
 
 function setStatus(state, text) {
-  statusBadge.className = "status-badge " + (state === "ready" ? "ready" : "");
+  let cls = "status-badge";
+  if (state === "ready") cls += " ready";
+  else if (state === "init" || text === "Initializing...") cls += " init";
+  statusBadge.className = cls;
   statusText.textContent = text;
 }
 
