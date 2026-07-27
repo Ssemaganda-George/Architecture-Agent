@@ -188,10 +188,15 @@ export class GeminiClient {
 
   private sanitizeLLMOutput(text: string): string {
     if (!text) return text;
-    const cleaned = text.replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>/g, "");
+    let cleaned = text;
+    let prev = "";
+    while (prev !== cleaned) {
+      prev = cleaned;
+      cleaned = cleaned.replace(/<environment_details[^>]*>[\s\S]*?<\/environment_details>/g, "");
+    }
     const idx = cleaned.lastIndexOf("<environment_details");
     if (idx !== -1) {
-      return cleaned.substring(0, idx).trim();
+      cleaned = cleaned.substring(0, idx);
     }
     return cleaned.trim();
   }
